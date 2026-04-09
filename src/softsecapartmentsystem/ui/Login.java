@@ -67,9 +67,9 @@ public class Login extends JFrame{
                 if (username.isEmpty() || password.isEmpty()) {
                     statusLabel.setText("Username and password cannot be empty");
                     statusLabel.setForeground(Color.RED);
-                } else if (username.equals("admin") && password.equals("admin123")) {
-                    statusLabel.setText("Login successful");
-                    statusLabel.setForeground(new Color(0, 128, 0));
+                } else if (username.equals("student") && password.equals("student123")) {
+                    new StudentDashboard();
+                    dispose();
                 
                 } else {
                     statusLabel.setText("Login button clicked");
