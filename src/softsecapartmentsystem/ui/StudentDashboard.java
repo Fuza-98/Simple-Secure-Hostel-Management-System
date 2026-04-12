@@ -39,14 +39,13 @@ public class StudentDashboard extends JFrame {
         applyRoomButton = new JButton("Apply for Room");
         applyRoomButton.setBounds(150, 130, 200, 35);
 
-        searchRoomButton = new JButton("Search Available Rooms");
-        searchRoomButton.setBounds(150, 180, 200, 35);
-
         personalInfoButton = new JButton("View Personal Info");
-        personalInfoButton.setBounds(150, 230, 200, 35);
+        personalInfoButton.setBounds(150, 180, 200, 35);
 
         logoutButton = new JButton("Logout");
         logoutButton.setBounds(150, 280, 200, 35);
+        logoutButton.setBackground(Color.RED);
+        logoutButton.setForeground(Color.WHITE);
         
         
         //Buttons and event listeners
@@ -57,19 +56,12 @@ public class StudentDashboard extends JFrame {
             }
         });
         
-        searchRoomButton.addActionListener(new ActionListener() {
+         personalInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new searchRoom(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new StudentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
                 dispose();
             }
-        });
-        
-       /*  personalInfoButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                new studentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
-                dispose();
-            }
-        }); */
+        }); 
 
         logoutButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -81,7 +73,6 @@ public class StudentDashboard extends JFrame {
         panel.add(titleLabel);
         panel.add(welcomeLabel);
         panel.add(applyRoomButton);
-        panel.add(searchRoomButton);
         panel.add(personalInfoButton);
         panel.add(logoutButton);
 

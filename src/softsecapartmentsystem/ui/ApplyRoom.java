@@ -1,6 +1,7 @@
 package softsecapartmentsystem.ui;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -9,14 +10,15 @@ public class ApplyRoom extends JFrame {
     JLabel titleLabel;
     JLabel studentIdLabel, nameLabel, genderLabel;
     JLabel studentIdValue, nameValue, genderValue;
-    JLabel roomTypeLabel, specialRequestLabel;
+    JLabel selectedRoomLabel, selectedRoomValue;
+    JLabel specialRequestLabel;
 
-    JComboBox<String> roomTypeCombo;
+    JTable roomTable;
+    JScrollPane tableScrollPane, requestScrollPane;
     JTextArea specialRequestArea;
-    JButton applyButton, clearButton, backButton;
 
+    JButton applyButton, clearButton, backButton;
     JPanel panel;
-    JScrollPane scrollPane;
 
     String studentId;
     String studentName;
@@ -28,7 +30,7 @@ public class ApplyRoom extends JFrame {
         this.studentGender = studentGender;
 
         setTitle("Apply for Room");
-        setSize(500, 450);
+        setSize(760, 520);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -38,52 +40,95 @@ public class ApplyRoom extends JFrame {
 
         titleLabel = new JLabel("Apply for Hostel Room");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBounds(130, 20, 250, 30);
+        titleLabel.setBounds(260, 20, 250, 30);
 
         studentIdLabel = new JLabel("Student ID:");
-        studentIdLabel.setBounds(60, 80, 100, 25);
-
+        studentIdLabel.setBounds(40, 70, 100, 25);
         studentIdValue = new JLabel(this.studentId);
-        studentIdValue.setBounds(180, 80, 200, 25);
+        studentIdValue.setBounds(130, 70, 180, 25);
 
         nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(60, 115, 100, 25);
-
+        nameLabel.setBounds(40, 100, 100, 25);
         nameValue = new JLabel(this.studentName);
-        nameValue.setBounds(180, 115, 200, 25);
+        nameValue.setBounds(130, 100, 180, 25);
 
         genderLabel = new JLabel("Gender:");
-        genderLabel.setBounds(60, 150, 100, 25);
-
+        genderLabel.setBounds(40, 130, 100, 25);
         genderValue = new JLabel(this.studentGender);
-        genderValue.setBounds(180, 150, 200, 25);
+        genderValue.setBounds(130, 130, 180, 25);
 
-        roomTypeLabel = new JLabel("Room Type:");
-        roomTypeLabel.setBounds(60, 190, 100, 25);
+        String[] columnNames = {"Room Number", "Room Type", "Capacity", "Occupied", "Available"};
+        Object[][] roomData = {
+            {"A101", "Single", 1, 0, 1},
+            {"A102", "Double", 2, 1, 1},
+            {"A103", "Double", 2, 2, 0},
+            {"A104", "Triple", 3, 1, 2},
+            {"A105", "Triple", 3, 3, 0}
+        };
 
-        String[] roomTypes = {"Single", "Double", "Triple"};
-        roomTypeCombo = new JComboBox<>(roomTypes);
-        roomTypeCombo.setBounds(180, 190, 180, 25);
+        DefaultTableModel model = new DefaultTableModel(roomData, columnNames) {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        roomTable = new JTable(model);
+        roomTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        tableScrollPane = new JScrollPane(roomTable);
+        tableScrollPane.setBounds(40, 180, 660, 150);
+
+        selectedRoomLabel = new JLabel("Selected Room:");
+        selectedRoomLabel.setBounds(40, 350, 100, 25);
+
+        selectedRoomValue = new JLabel("None");
+        selectedRoomValue.setBounds(150, 350, 150, 25);
+        selectedRoomValue.setFont(new Font("Arial", Font.BOLD, 14));
 
         specialRequestLabel = new JLabel("Special Request:");
-        specialRequestLabel.setBounds(60, 230, 110, 25);
+        specialRequestLabel.setBounds(40, 390, 110, 25);
 
         specialRequestArea = new JTextArea();
-        scrollPane = new JScrollPane(specialRequestArea);
-        scrollPane.setBounds(180, 230, 200, 80);
+        requestScrollPane = new JScrollPane(specialRequestArea);
+        requestScrollPane.setBounds(150, 390, 220, 50);
 
         applyButton = new JButton("Apply");
-        applyButton.setBounds(90, 340, 90, 30);
+        applyButton.setBounds(430, 390, 90, 30);
 
         clearButton = new JButton("Clear");
-        clearButton.setBounds(200, 340, 90, 30);
+        clearButton.setBounds(540, 390, 90, 30);
 
         backButton = new JButton("Back");
-        backButton.setBounds(310, 340, 90, 30);
+        backButton.setBounds(650, 390, 80, 30);
+
+        roomTable.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = roomTable.getSelectedRow();
+            if (selectedRow != -1) {
+                String roomNumber = roomTable.getValueAt(selectedRow, 0).toString();
+                selectedRoomValue.setText(roomNumber);
+            }
+        });
 
         applyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String roomType = roomTypeCombo.getSelectedItem().toString();
+                int selectedRow = roomTable.getSelectedRow();
+
+                if (selectedRow == -1) {
+                    JOptionPane.showMessageDialog(null,
+                            "Please select a room first.");
+                    return;
+                }
+
+                int available = Integer.parseInt(roomTable.getValueAt(selectedRow, 4).toString());
+
+                if (available <= 0) {
+                    JOptionPane.showMessageDialog(null,
+                            "This room is already full. Please choose another room.");
+                    return;
+                }
+
+                String roomNumber = roomTable.getValueAt(selectedRow, 0).toString();
+                String roomType = roomTable.getValueAt(selectedRow, 1).toString();
                 String specialRequest = specialRequestArea.getText();
 
                 JOptionPane.showMessageDialog(null,
@@ -91,6 +136,7 @@ public class ApplyRoom extends JFrame {
                         + "\nStudent ID: " + ApplyRoom.this.studentId
                         + "\nName: " + ApplyRoom.this.studentName
                         + "\nGender: " + ApplyRoom.this.studentGender
+                        + "\nRoom Number: " + roomNumber
                         + "\nRoom Type: " + roomType
                         + "\nSpecial Request: " + specialRequest);
             }
@@ -98,14 +144,19 @@ public class ApplyRoom extends JFrame {
 
         clearButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                roomTypeCombo.setSelectedIndex(0);
+                roomTable.clearSelection();
+                selectedRoomValue.setText("None");
                 specialRequestArea.setText("");
             }
         });
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(ApplyRoom.this.studentId, ApplyRoom.this.studentName, ApplyRoom.this.studentGender);
+                new StudentDashboard(
+                        ApplyRoom.this.studentId,
+                        ApplyRoom.this.studentName,
+                        ApplyRoom.this.studentGender
+                );
                 dispose();
             }
         });
@@ -117,10 +168,11 @@ public class ApplyRoom extends JFrame {
         panel.add(nameValue);
         panel.add(genderLabel);
         panel.add(genderValue);
-        panel.add(roomTypeLabel);
-        panel.add(roomTypeCombo);
+        panel.add(tableScrollPane);
+        panel.add(selectedRoomLabel);
+        panel.add(selectedRoomValue);
         panel.add(specialRequestLabel);
-        panel.add(scrollPane);
+        panel.add(requestScrollPane);
         panel.add(applyButton);
         panel.add(clearButton);
         panel.add(backButton);
