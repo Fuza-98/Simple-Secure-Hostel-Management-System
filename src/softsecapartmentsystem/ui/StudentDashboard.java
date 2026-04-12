@@ -58,7 +58,7 @@ public class StudentDashboard extends JFrame {
         
          personalInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new studentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
                 dispose();
             }
         }); 

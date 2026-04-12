@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class StudentInfo extends JFrame {
+public class studentInfo extends JFrame {
 
     JLabel titleLabel;
     JLabel studentIdLabel, studentIdValue;
@@ -25,7 +25,7 @@ public class StudentInfo extends JFrame {
     String studentName;
     String studentGender;
 
-    public StudentInfo(String studentId, String studentName, String studentGender) {
+    public studentInfo(String studentId, String studentName, String studentGender) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.studentGender = studentGender;
@@ -78,7 +78,7 @@ public class StudentInfo extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(StudentInfo.this.studentId, StudentInfo.this.studentName, StudentInfo.this.studentGender);
+                new StudentDashboard(studentInfo.this.studentId, studentInfo.this.studentName, studentInfo.this.studentGender);
                 dispose();
             }
         });
