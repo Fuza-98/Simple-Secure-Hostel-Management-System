@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package softsecapartmentsystem.ui;
 
 import javax.swing.*;
@@ -22,7 +18,15 @@ public class ApplyRoom extends JFrame {
     JPanel panel;
     JScrollPane scrollPane;
 
-    public ApplyRoom() {
+    String studentId;
+    String studentName;
+    String studentGender;
+
+    public ApplyRoom(String studentId, String studentName, String studentGender) {
+        this.studentId = studentId;
+        this.studentName = studentName;
+        this.studentGender = studentGender;
+
         setTitle("Apply for Room");
         setSize(500, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,24 +38,24 @@ public class ApplyRoom extends JFrame {
 
         titleLabel = new JLabel("Apply for Hostel Room");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBounds(140, 20, 250, 30);
+        titleLabel.setBounds(130, 20, 250, 30);
 
         studentIdLabel = new JLabel("Student ID:");
         studentIdLabel.setBounds(60, 80, 100, 25);
 
-        studentIdValue = new JLabel("20241234");
+        studentIdValue = new JLabel(this.studentId);
         studentIdValue.setBounds(180, 80, 200, 25);
 
         nameLabel = new JLabel("Name:");
         nameLabel.setBounds(60, 115, 100, 25);
 
-        nameValue = new JLabel("Ali bin Ahmad");
+        nameValue = new JLabel(this.studentName);
         nameValue.setBounds(180, 115, 200, 25);
 
         genderLabel = new JLabel("Gender:");
         genderLabel.setBounds(60, 150, 100, 25);
 
-        genderValue = new JLabel("Male");
+        genderValue = new JLabel(this.studentGender);
         genderValue.setBounds(180, 150, 200, 25);
 
         roomTypeLabel = new JLabel("Room Type:");
@@ -62,7 +66,7 @@ public class ApplyRoom extends JFrame {
         roomTypeCombo.setBounds(180, 190, 180, 25);
 
         specialRequestLabel = new JLabel("Special Request:");
-        specialRequestLabel.setBounds(60, 230, 100, 25);
+        specialRequestLabel.setBounds(60, 230, 110, 25);
 
         specialRequestArea = new JTextArea();
         scrollPane = new JScrollPane(specialRequestArea);
@@ -83,8 +87,12 @@ public class ApplyRoom extends JFrame {
                 String specialRequest = specialRequestArea.getText();
 
                 JOptionPane.showMessageDialog(null,
-                        "Application Submitted\nRoom Type: " + roomType +
-                        "\nSpecial Request: " + specialRequest);
+                        "Application Submitted"
+                        + "\nStudent ID: " + ApplyRoom.this.studentId
+                        + "\nName: " + ApplyRoom.this.studentName
+                        + "\nGender: " + ApplyRoom.this.studentGender
+                        + "\nRoom Type: " + roomType
+                        + "\nSpecial Request: " + specialRequest);
             }
         });
 
@@ -97,7 +105,7 @@ public class ApplyRoom extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard();
+                new StudentDashboard(ApplyRoom.this.studentId, ApplyRoom.this.studentName, ApplyRoom.this.studentGender);
                 dispose();
             }
         });

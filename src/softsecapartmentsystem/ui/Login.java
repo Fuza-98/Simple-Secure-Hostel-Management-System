@@ -68,7 +68,11 @@ public class Login extends JFrame{
                     statusLabel.setText("Username and password cannot be empty");
                     statusLabel.setForeground(Color.RED);
                 } else if (username.equals("student") && password.equals("student123")) {
-                    new StudentDashboard();
+                    String studentId = "20241234";
+                    String studentName = "Ali bin Ahmad";
+                    String studentGender = "Male";
+
+                    new StudentDashboard(studentId, studentName, studentGender);
                     dispose();
                 
                 } else {
