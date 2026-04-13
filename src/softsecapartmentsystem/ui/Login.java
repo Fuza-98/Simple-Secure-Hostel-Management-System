@@ -15,12 +15,12 @@ public class Login extends JFrame{
     JLabel titleLabel, loginLabel, userLabel, passLabel, statusLabel;
     JTextField userField;
     JPasswordField passField;
-    JButton loginButton, clearButton;
+    JButton loginButton, clearButton, registerButton;
     JPanel panel;
     
     public Login(){
         setTitle("HOSTEL MANAGEMENT SYSTEM");
-        setSize(500,350);
+        setSize(500,380);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
      
@@ -54,9 +54,11 @@ public class Login extends JFrame{
         clearButton = new JButton("Clear");
         clearButton.setBounds(250, 210, 90, 30);
 
+        registerButton = new JButton("Register");
+        registerButton.setBounds(190, 250, 100, 30);
+
         statusLabel = new JLabel("Please enter your login details");
-        statusLabel.setBounds(140, 260, 250, 25);
-        statusLabel.setForeground(Color.DARK_GRAY);
+        statusLabel.setBounds(160, 290, 260, 25);
         
         //Event listeners
         loginButton.addActionListener(new ActionListener() {
@@ -75,7 +77,13 @@ public class Login extends JFrame{
                     new StudentDashboard(studentId, studentName, studentGender);
                     dispose();
                 
-                } else {
+                } else if (username.equals("admin") && password.equals("admin123")) {
+                    // Success - Open Admin Dashboard
+                    new AdminDashboard();
+                    dispose();
+                } 
+                
+                else {
                     statusLabel.setText("Login button clicked");
                     statusLabel.setForeground(new Color(0, 128, 0));
                 }
@@ -93,6 +101,13 @@ public class Login extends JFrame{
             }
         });
         
+        registerButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new Register();
+                dispose();
+            }
+        });
+        
         panel.add(titleLabel);
         panel.add(loginLabel);
         panel.add(userLabel);
@@ -101,6 +116,7 @@ public class Login extends JFrame{
         panel.add(passField);
         panel.add(loginButton);
         panel.add(clearButton);
+        panel.add(registerButton);
         panel.add(statusLabel);
         add(panel);
         

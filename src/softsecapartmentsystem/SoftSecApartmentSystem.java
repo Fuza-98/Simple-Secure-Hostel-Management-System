@@ -17,7 +17,6 @@ public class SoftSecApartmentSystem {
      */
     public static void main(String[] args) {
         new Login();
-        new AdminLogin();
     }
     
 }

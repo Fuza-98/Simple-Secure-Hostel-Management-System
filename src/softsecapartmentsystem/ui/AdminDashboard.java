@@ -40,6 +40,11 @@ public class AdminDashboard extends JFrame {
             new ManageRooms();
             dispose();
         });
+        
+        viewApplicationsButton.addActionListener(e -> {
+            new ViewApplications();
+            dispose();
+        });
 
         logoutButton.addActionListener(e -> {
             new Login();
