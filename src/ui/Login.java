@@ -2,10 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package softsecapartmentsystem.ui;
+package ui;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+
+//DB imports
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import db.DBConnection;
 
 /**
  *
@@ -63,32 +70,7 @@ public class Login extends JFrame{
         //Event listeners
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String username = userField.getText();
-                String password = new String(passField.getPassword());
-
-                if (username.isEmpty() || password.isEmpty()) {
-                    statusLabel.setText("Username and password cannot be empty");
-                    statusLabel.setForeground(Color.RED);
-                } else if (username.equals("student") && password.equals("student123")) {
-                    String studentId = "20241234";
-                    String studentName = "Ali bin Ahmad";
-                    String studentGender = "Male";
-
-                    new StudentDashboard(studentId, studentName, studentGender);
-                    dispose();
-                
-                } else if (username.equals("admin") && password.equals("admin123")) {
-                    // Success - Open Admin Dashboard
-                    new AdminDashboard();
-                    dispose();
-                } 
-                
-                else {
-                    statusLabel.setText("Login button clicked");
-                    statusLabel.setForeground(new Color(0, 128, 0));
-                }
-                
-                
+                handleLogin();   
             }
         });
 
@@ -122,5 +104,55 @@ public class Login extends JFrame{
         
         setVisible(true);   
     }
+    
+    private void handleLogin() {
+    String username = userField.getText().trim();
+    String password = new String(passField.getPassword());
+
+    if (username.isEmpty() || password.isEmpty()) {
+        statusLabel.setText("Username and password cannot be empty");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+
+    String sql = "SELECT u.studentID, s.full_name, s.gender, s.phone, s.email, s.address, u.role "
+               + "FROM users u "
+               + "LEFT JOIN students s ON u.studentID = s.studentID "
+               + "WHERE u.username = ? AND u.password = ?";
+
+    try (Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, username);
+        ps.setString(2, password);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String role = rs.getString("role");
+
+                if ("student".equals(role)) {
+                    String studentId = rs.getString("studentID");
+                    String studentName = rs.getString("full_name");
+                    String studentGender = rs.getString("gender");
+
+                    new StudentDashboard(studentId, studentName, studentGender);
+                    dispose();
+
+                } else if ("admin".equals(role)) {
+                    new AdminDashboard();
+                    dispose();
+                }
+            } else {
+                statusLabel.setText("Invalid username or password");
+                statusLabel.setForeground(Color.RED);
+            }
+        }
+
+    } catch (Exception e) {
+        statusLabel.setText("Database error occurred");
+        statusLabel.setForeground(Color.RED);
+        e.printStackTrace();
+    }
+}
           
 }
