@@ -11,6 +11,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import db.DBConnection;
 
+//Hashing
+import org.mindrot.jbcrypt.BCrypt;
+
 public class Register extends JFrame {
 
     JLabel titleLabel, registerLabel;
@@ -167,12 +170,14 @@ public class Register extends JFrame {
                 return;
             }
         }
-
+        
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt()); //For hashing
+        
         // Insert new user account
         try (PreparedStatement ps3 = conn.prepareStatement(insertUserSql)) {
             ps3.setString(1, studentId);
             ps3.setString(2, username);
-            ps3.setString(3, password); // later replace with hashed password
+            ps3.setString(3, hashedPassword); // Replaced with hashed password
             ps3.setString(4, "student");
 
             int rowsInserted = ps3.executeUpdate();

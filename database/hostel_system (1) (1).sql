@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 14, 2026 at 04:54 AM
--- Server version: 9.1.0
--- PHP Version: 8.3.14
+-- Generation Time: Apr 15, 2026 at 07:30 AM
+-- Server version: 8.2.0
+-- PHP Version: 8.2.13
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,31 @@ SET time_zone = "+00:00";
 --
 -- Database: `hostel_system`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `rooms`
+--
+
+DROP TABLE IF EXISTS `rooms`;
+CREATE TABLE IF NOT EXISTS `rooms` (
+  `roomNum` varchar(10) NOT NULL,
+  `roomType` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `capacity` int NOT NULL,
+  `occupied` int NOT NULL,
+  `available` int NOT NULL,
+  PRIMARY KEY (`roomNum`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `rooms`
+--
+
+INSERT INTO `rooms` (`roomNum`, `roomType`, `capacity`, `occupied`, `available`) VALUES
+('A101', 'SINGLE', 1, 0, 1),
+('A102', 'DOUBLE', 2, 1, 1),
+('A501', 'TRIPLE', 3, 0, 3);
 
 -- --------------------------------------------------------
 

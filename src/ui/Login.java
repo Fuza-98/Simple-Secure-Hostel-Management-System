@@ -14,6 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import db.DBConnection;
 
+//Hashing
+import org.mindrot.jbcrypt.BCrypt;
+
 /**
  *
  * @author Acer
@@ -115,32 +118,37 @@ public class Login extends JFrame{
         return;
     }
 
-    String sql = "SELECT u.studentID, s.full_name, s.gender, s.phone, s.email, s.address, u.role "
-               + "FROM users u "
-               + "LEFT JOIN students s ON u.studentID = s.studentID "
-               + "WHERE u.username = ? AND u.password = ?";
+     String sql = "SELECT u.studentID, s.full_name, s.gender, u.password, u.role "
+                    + "FROM users u "
+                    + "LEFT JOIN students s ON u.studentID = s.studentID "
+                    + "WHERE u.username = ?";
 
     try (Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)) {
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
         ps.setString(1, username);
-        ps.setString(2, password);
 
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
-                String role = rs.getString("role");
+                String storedHash = rs.getString("password");
 
-                if ("student".equals(role)) {
-                    String studentId = rs.getString("studentID");
-                    String studentName = rs.getString("full_name");
-                    String studentGender = rs.getString("gender");
+                if (BCrypt.checkpw(password, storedHash)) {
+                    String role = rs.getString("role");
 
-                    new StudentDashboard(studentId, studentName, studentGender);
-                    dispose();
+                    if ("student".equals(role)) {
+                        String studentId = rs.getString("studentID");
+                        String studentName = rs.getString("full_name");
+                        String studentGender = rs.getString("gender");
 
-                } else if ("admin".equals(role)) {
-                    new AdminDashboard();
-                    dispose();
+                        new StudentDashboard(studentId, studentName, studentGender);
+                        dispose();
+                    } else if ("admin".equals(role)) {
+                        new AdminDashboard();
+                        dispose();
+                    }
+                } else {
+                    statusLabel.setText("Invalid username or password");
+                    statusLabel.setForeground(Color.RED);
                 }
             } else {
                 statusLabel.setText("Invalid username or password");

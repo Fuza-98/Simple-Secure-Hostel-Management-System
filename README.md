@@ -10,3 +10,4 @@ Project for Software Security
 1. Tekan export
 2. Save ke folder \database kalau dh pull changes tu akan ada folder baru tu
 3. Push changes
+4. MAKE SURE TO DO IT!!!
