@@ -4,6 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+//DB imports
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import db.DBConnection;
+
 public class Register extends JFrame {
 
     JLabel titleLabel, registerLabel;
@@ -72,22 +79,7 @@ public class Register extends JFrame {
 
         registerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String studentId = studentIdField.getText().trim();
-                String username = usernameField.getText().trim();
-                String password = new String(passwordField.getPassword());
-                String confirmPassword = new String(confirmPasswordField.getPassword());
-
-                if (studentId.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                    statusLabel.setText("Please fill in all fields.");
-                    statusLabel.setForeground(Color.RED);
-                } else if (!password.equals(confirmPassword)) {
-                    statusLabel.setText("Passwords do not match.");
-                    statusLabel.setForeground(Color.RED);
-                } else {
-                    JOptionPane.showMessageDialog(null,
-                        "Registered successfully"
-                        );
-                }
+                handleRegistration();
             }
         });
 
@@ -126,4 +118,83 @@ public class Register extends JFrame {
         add(panel);
         setVisible(true);
     }
+    
+    private void handleRegistration() {
+    String studentId = studentIdField.getText().trim();
+    String username = usernameField.getText().trim();
+    String password = new String(passwordField.getPassword());
+    String confirmPassword = new String(confirmPasswordField.getPassword());
+
+    if (studentId.isEmpty() || username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+        statusLabel.setText("Please fill in all fields.");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+
+    if (!password.equals(confirmPassword)) {
+        statusLabel.setText("Passwords do not match.");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+
+    String checkStudentSql = "SELECT studentID FROM students WHERE studentID = ?";
+    String checkUserSql = "SELECT username FROM users WHERE username = ? OR studentID = ?";
+    String insertUserSql = "INSERT INTO users (studentID, username, password, role) VALUES (?, ?, ?, ?)";
+
+    try (Connection conn = DBConnection.getConnection()) {
+
+        // Check if student exists
+        try (PreparedStatement ps1 = conn.prepareStatement(checkStudentSql)) {
+            ps1.setString(1, studentId);
+            ResultSet rs1 = ps1.executeQuery();
+
+            if (!rs1.next()) {
+                statusLabel.setText("Student ID not found in student records.");
+                statusLabel.setForeground(Color.RED);
+                return;
+            }
+        }
+
+        // Check if username or student already registered
+        try (PreparedStatement ps2 = conn.prepareStatement(checkUserSql)) {
+            ps2.setString(1, username);
+            ps2.setString(2, studentId);
+            ResultSet rs2 = ps2.executeQuery();
+
+            if (rs2.next()) {
+                statusLabel.setText("Username already taken or student already registered.");
+                statusLabel.setForeground(Color.RED);
+                return;
+            }
+        }
+
+        // Insert new user account
+        try (PreparedStatement ps3 = conn.prepareStatement(insertUserSql)) {
+            ps3.setString(1, studentId);
+            ps3.setString(2, username);
+            ps3.setString(3, password); // later replace with hashed password
+            ps3.setString(4, "student");
+
+            int rowsInserted = ps3.executeUpdate();
+
+            if (rowsInserted > 0) {
+                statusLabel.setText("Registration successful. You may now log in.");
+                statusLabel.setForeground(new Color(0, 128, 0));
+
+                studentIdField.setText("");
+                usernameField.setText("");
+                passwordField.setText("");
+                confirmPasswordField.setText("");
+            } else {
+                statusLabel.setText("Registration failed.");
+                statusLabel.setForeground(Color.RED);
+            }
+        }
+
+    } catch (Exception e) {
+        statusLabel.setText("Database error occurred.");
+        statusLabel.setForeground(Color.RED);
+        e.printStackTrace();
+    }
+}
 }

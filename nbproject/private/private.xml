@@ -3,15 +3,15 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/SoftSecApartmentSystem.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/Login.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/ApplyRoom.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/studentInfo.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/AdminDashboard.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/ManageRooms.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/Register.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/StudentDashboard.java</file>
-            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/softsecapartmentsystem/ui/ViewApplications.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/main/SoftSecApartmentSystem.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/Login.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/Register.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/ApplyRoom.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/studentInfo.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/AdminDashboard.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/StudentDashboard.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/ui/ViewApplications.java</file>
+            <file>file:/C:/Users/Acer/OneDrive%20-%20Universiti%20Tenaga%20Nasional/UNITEN/SEM%205/SoftSec/Project/SoftSecApartmentSystem/src/db/DBConnection.java</file>
         </group>
     </open-files>
 </project-private>
