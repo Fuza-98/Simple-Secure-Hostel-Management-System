@@ -1,4 +1,4 @@
-package softsecapartmentsystem.ui;
+package ui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,14 +10,14 @@ public class StudentDashboard extends JFrame {
     JButton applyRoomButton, searchRoomButton, personalInfoButton, logoutButton;
     JPanel panel;
 
-    String studentId;
-    String studentName;
-    String studentGender;
+    String studentId, studentName, studentGender;
+    
 
     public StudentDashboard(String studentId, String studentName, String studentGender) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.studentGender = studentGender;
+        
 
         setTitle("Student Dashboard");
         setSize(500, 400);
@@ -58,7 +58,7 @@ public class StudentDashboard extends JFrame {
         
          personalInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new studentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
                 dispose();
             }
         }); 

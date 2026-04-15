@@ -2,13 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package softsecapartmentsystem.ui;
+package ui;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class StudentInfo extends JFrame {
+//DB imports
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import db.DBConnection;
+
+public class studentInfo extends JFrame {
 
     JLabel titleLabel;
     JLabel studentIdLabel, studentIdValue;
@@ -21,11 +28,10 @@ public class StudentInfo extends JFrame {
     JButton backButton;
     JPanel panel;
 
-    String studentId;
-    String studentName;
-    String studentGender;
+    String studentId, studentName, studentGender, studentPhone, studentEmail, studentAddress;
+    
 
-    public StudentInfo(String studentId, String studentName, String studentGender) {
+    public studentInfo(String studentId, String studentName, String studentGender) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.studentGender = studentGender;
@@ -38,6 +44,8 @@ public class StudentInfo extends JFrame {
         panel = new JPanel();
         panel.setLayout(null);
         panel.setBackground(new Color(240, 248, 255));
+        
+        
 
         titleLabel = new JLabel("Student Personal Information");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -57,20 +65,21 @@ public class StudentInfo extends JFrame {
         genderLabel.setBounds(70, 160, 120, 25);
         genderValue = new JLabel(this.studentGender);
         genderValue.setBounds(220, 160, 200, 25);
+        
 
         phoneLabel = new JLabel("Phone Number:");
         phoneLabel.setBounds(70, 195, 120, 25);
-        phoneValue = new JLabel("012-3456789");
+        phoneValue = new JLabel("");
         phoneValue.setBounds(220, 195, 200, 25);
 
         emailLabel = new JLabel("Email:");
         emailLabel.setBounds(70, 230, 120, 25);
-        emailValue = new JLabel("student@email.com");
+        emailValue = new JLabel("");
         emailValue.setBounds(220, 230, 200, 25);
 
         addressLabel = new JLabel("Address:");
         addressLabel.setBounds(70, 265, 120, 25);
-        addressValue = new JLabel("Kajang, Selangor");
+        addressValue = new JLabel("");
         addressValue.setBounds(220, 265, 200, 25);
 
         backButton = new JButton("Back");
@@ -78,10 +87,14 @@ public class StudentInfo extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(StudentInfo.this.studentId, StudentInfo.this.studentName, StudentInfo.this.studentGender);
+                new StudentDashboard(studentInfo.this.studentId, studentInfo.this.studentName, studentInfo.this.studentGender);
                 dispose();
             }
         });
+        
+        loadStudentDetails();
+        
+        
 
         panel.add(titleLabel);
         panel.add(studentIdLabel);
@@ -101,4 +114,25 @@ public class StudentInfo extends JFrame {
         add(panel);
         setVisible(true);
     }
+    private void loadStudentDetails() {
+            String sql = "SELECT phone, email, address FROM students WHERE studentID = ?";
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                ps.setString(1, studentId);
+
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    phoneValue.setText(rs.getString("phone"));
+                    emailValue.setText(rs.getString("email"));
+                    addressValue.setText(rs.getString("address"));
+                }
+
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Failed to load student details.");
+                e.printStackTrace();
+            }
+        }
 }
