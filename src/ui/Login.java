@@ -143,7 +143,7 @@ public class Login extends JFrame{
                         new StudentDashboard(studentId, studentName, studentGender);
                         dispose();
                     } else if ("admin".equals(role)) {
-                        new AdminDashboard();
+                        new AdminDashboard(role);
                         dispose();
                     }
                 } else {

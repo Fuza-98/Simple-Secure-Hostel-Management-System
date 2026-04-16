@@ -1,3 +1,4 @@
 # NetBeans and build files to ignore
 build/
 nbproject/private/
+/dist/

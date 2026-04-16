@@ -77,7 +77,7 @@ public class Register extends JFrame {
         backButton.setBounds(330, 330, 120, 30);
 
         statusLabel = new JLabel("");
-        statusLabel.setBounds(80, 375, 380, 25);
+        statusLabel.setBounds(60, 375, 500, 50);
         statusLabel.setForeground(Color.RED);
 
         registerButton.addActionListener(new ActionListener() {
@@ -122,6 +122,10 @@ public class Register extends JFrame {
         setVisible(true);
     }
     
+    private boolean isValidPassword(String password) {
+        return password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$");
+    }
+    
     private void handleRegistration() {
     String studentId = studentIdField.getText().trim();
     String username = usernameField.getText().trim();
@@ -133,6 +137,25 @@ public class Register extends JFrame {
         statusLabel.setForeground(Color.RED);
         return;
     }
+    
+    if (username.length() < 3 || username.length() > 100) {
+        statusLabel.setText("Name must be between 3 and 100 characters.");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+
+    if (!username.matches("[A-Za-z @.'-]+")) {
+        statusLabel.setText("Name contains invalid characters.");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+
+    if (!isValidPassword(password)) {
+        statusLabel.setText("<html>Password must be at least 8 characters with uppercase, lowercase, and a number.</html>");
+        statusLabel.setForeground(Color.RED);
+        return;
+    }
+    
 
     if (!password.equals(confirmPassword)) {
         statusLabel.setText("Passwords do not match.");

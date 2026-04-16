@@ -3,13 +3,25 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import util.SessionTimeout;
 
 public class AdminDashboard extends JFrame {
+    
+    private String role;
+    
     JLabel titleLabel, welcomeLabel;
     JButton manageRoomsButton, viewApplicationsButton, logoutButton;
     JPanel panel;
 
-    public AdminDashboard() {
+    public AdminDashboard(String role) {  
+        this.role = role;
+
+        if (!"admin".equalsIgnoreCase(role)) {
+            JOptionPane.showMessageDialog(null, "Access denied. Admins only.");
+            dispose();
+            return;
+        }
+        
         setTitle("Admin Dashboard - Hostel System");
         setSize(500, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -37,16 +49,17 @@ public class AdminDashboard extends JFrame {
 
         // Action Listeners
         manageRoomsButton.addActionListener(e -> {
-            new ManageRooms();
+            new ManageRooms(AdminDashboard.this.role);
             dispose();
         });
         
         viewApplicationsButton.addActionListener(e -> {
-            new ViewApplications();
+            new ViewApplications(AdminDashboard.this.role);
             dispose();
         });
 
         logoutButton.addActionListener(e -> {
+            SessionTimeout.stop();
             new Login();
             dispose();
         });
@@ -59,5 +72,7 @@ public class AdminDashboard extends JFrame {
 
         add(panel);
         setVisible(true);
+        
+        SessionTimeout.start(this);
     }
 }

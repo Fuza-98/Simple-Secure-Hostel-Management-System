@@ -15,6 +15,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import db.DBConnection;
 
+import util.SessionTimeout;
+
 public class studentInfo extends JFrame {
 
     JLabel titleLabel;
@@ -113,6 +115,8 @@ public class studentInfo extends JFrame {
 
         add(panel);
         setVisible(true);
+        
+        SessionTimeout.start(this);
     }
     private void loadStudentDetails() {
             String sql = "SELECT phone, email, address FROM students WHERE studentID = ?";
@@ -135,4 +139,5 @@ public class studentInfo extends JFrame {
                 e.printStackTrace();
             }
         }
+    
 }

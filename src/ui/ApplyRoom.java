@@ -1,9 +1,18 @@
 package ui;
 
+import util.SessionTimeout;
+
+//ui
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+
+//DB connection
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import db.DBConnection;
 
 public class ApplyRoom extends JFrame {
 
@@ -57,16 +66,9 @@ public class ApplyRoom extends JFrame {
         genderValue = new JLabel(this.studentGender);
         genderValue.setBounds(130, 130, 180, 25);
 
-        String[] columnNames = {"Room Number", "Room Type", "Capacity", "Occupied", "Available"};
-        Object[][] roomData = {
-            {"A101", "Single", 1, 0, 1},
-            {"A102", "Double", 2, 1, 1},
-            {"A103", "Double", 2, 2, 0},
-            {"A104", "Triple", 3, 1, 2},
-            {"A105", "Triple", 3, 3, 0}
-        };
-
-        DefaultTableModel model = new DefaultTableModel(roomData, columnNames) {
+        String[] columnNames = {"Room ID", "Room Number", "Room Type", "Capacity", "Occupied", "Available"};
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
+            @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
@@ -74,6 +76,11 @@ public class ApplyRoom extends JFrame {
 
         roomTable = new JTable(model);
         roomTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // Hide Room ID column visually
+        roomTable.getColumnModel().getColumn(0).setMinWidth(0);
+        roomTable.getColumnModel().getColumn(0).setMaxWidth(0);
+        roomTable.getColumnModel().getColumn(0).setWidth(0);
 
         tableScrollPane = new JScrollPane(roomTable);
         tableScrollPane.setBounds(40, 180, 660, 150);
@@ -104,41 +111,14 @@ public class ApplyRoom extends JFrame {
         roomTable.getSelectionModel().addListSelectionListener(e -> {
             int selectedRow = roomTable.getSelectedRow();
             if (selectedRow != -1) {
-                String roomNumber = roomTable.getValueAt(selectedRow, 0).toString();
-                selectedRoomValue.setText(roomNumber);
+                String roomNum = roomTable.getValueAt(selectedRow, 1).toString();
+                selectedRoomValue.setText(roomNum);
             }
         });
 
         applyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int selectedRow = roomTable.getSelectedRow();
-
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(null,
-                            "Please select a room first.");
-                    return;
-                }
-
-                int available = Integer.parseInt(roomTable.getValueAt(selectedRow, 4).toString());
-
-                if (available <= 0) {
-                    JOptionPane.showMessageDialog(null,
-                            "This room is already full. Please choose another room.");
-                    return;
-                }
-
-                String roomNumber = roomTable.getValueAt(selectedRow, 0).toString();
-                String roomType = roomTable.getValueAt(selectedRow, 1).toString();
-                String specialRequest = specialRequestArea.getText();
-
-                JOptionPane.showMessageDialog(null,
-                        "Application Submitted"
-                        + "\nStudent ID: " + ApplyRoom.this.studentId
-                        + "\nName: " + ApplyRoom.this.studentName
-                        + "\nGender: " + ApplyRoom.this.studentGender
-                        + "\nRoom Number: " + roomNumber
-                        + "\nRoom Type: " + roomType
-                        + "\nSpecial Request: " + specialRequest);
+                handleApplication();
             }
         });
 
@@ -178,6 +158,103 @@ public class ApplyRoom extends JFrame {
         panel.add(backButton);
 
         add(panel);
+
+        loadRooms();
+
         setVisible(true);
+        
+        SessionTimeout.start(this);
+    }
+
+    private void loadRooms() {
+        String sql = "SELECT roomID, roomNum, roomType, capacity, occupied, (capacity - occupied) AS available FROM rooms";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            DefaultTableModel model = (DefaultTableModel) roomTable.getModel();
+            model.setRowCount(0);
+
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getInt("roomID"),
+                    rs.getString("roomNum"),
+                    rs.getString("roomType"),
+                    rs.getInt("capacity"),
+                    rs.getInt("occupied"),
+                    rs.getInt("available")
+                };
+                model.addRow(row);
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to load rooms.");
+            e.printStackTrace();
+        }
+    }
+
+    private void handleApplication() {
+        int selectedRow = roomTable.getSelectedRow();
+        String specialRequest = specialRequestArea.getText().trim();
+
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a room first.");
+            return;
+        }
+
+        if (specialRequest.length() > 255) {
+            JOptionPane.showMessageDialog(this, "Special request is too long.");
+            return;
+        }
+
+        int roomId = Integer.parseInt(roomTable.getValueAt(selectedRow, 0).toString());
+        int available = Integer.parseInt(roomTable.getValueAt(selectedRow, 5).toString());
+
+        if (available <= 0) {
+            JOptionPane.showMessageDialog(this, "This room is already full.");
+            return;
+        }
+
+        String checkSql = "SELECT applicationID FROM applications WHERE studentID = ? AND status IN ('Pending', 'Approved')";
+        String insertSql = "INSERT INTO applications (studentID, roomID, specialRequest, status) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection()) {
+
+            // Check if student already has an active application
+            try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+                checkPs.setString(1, studentId);
+
+                try (ResultSet rs = checkPs.executeQuery()) {
+                    if (rs.next()) {
+                        JOptionPane.showMessageDialog(this, "You already have an active application.");
+                        return;
+                    }
+                }
+            }
+
+            // Insert new application
+            try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
+                insertPs.setString(1, studentId);
+                insertPs.setInt(2, roomId);
+                insertPs.setString(3, specialRequest.isEmpty() ? null : specialRequest);
+                insertPs.setString(4, "Pending");
+
+                int rowsInserted = insertPs.executeUpdate();
+
+                if (rowsInserted > 0) {
+                    JOptionPane.showMessageDialog(this, "Application submitted successfully.");
+                    roomTable.clearSelection();
+                    selectedRoomValue.setText("None");
+                    specialRequestArea.setText("");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Application submission failed.");
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Database error occurred while submitting application.");
+            e.printStackTrace();
+        }
     }
 }

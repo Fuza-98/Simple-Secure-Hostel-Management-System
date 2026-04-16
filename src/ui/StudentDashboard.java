@@ -4,10 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import util.SessionTimeout;
+
 public class StudentDashboard extends JFrame {
 
     JLabel titleLabel, welcomeLabel;
-    JButton applyRoomButton, searchRoomButton, personalInfoButton, logoutButton;
+    JButton applyRoomButton, viewRoomStatusButton, personalInfoButton, logoutButton;
     JPanel panel;
 
     String studentId, studentName, studentGender;
@@ -41,6 +43,9 @@ public class StudentDashboard extends JFrame {
 
         personalInfoButton = new JButton("View Personal Info");
         personalInfoButton.setBounds(150, 180, 200, 35);
+        
+        viewRoomStatusButton = new JButton("View Application Status");
+        viewRoomStatusButton.setBounds(150, 230, 200, 35);
 
         logoutButton = new JButton("Logout");
         logoutButton.setBounds(150, 280, 200, 35);
@@ -62,9 +67,17 @@ public class StudentDashboard extends JFrame {
                 dispose();
             }
         }); 
+         
+         viewRoomStatusButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new ViewApplicationStatus(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                dispose();
+            }
+        }); 
 
         logoutButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                SessionTimeout.stop();
                 new Login();
                 dispose();
             }
@@ -74,9 +87,12 @@ public class StudentDashboard extends JFrame {
         panel.add(welcomeLabel);
         panel.add(applyRoomButton);
         panel.add(personalInfoButton);
+        panel.add(viewRoomStatusButton);
         panel.add(logoutButton);
 
         add(panel);
         setVisible(true);
+        
+        SessionTimeout.start(this);
     }
 }
