@@ -2,13 +2,13 @@ package ui;
 
 import util.SessionTimeout;
 
-//ui
+// ui
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
 
-//DB connection
+// DB connection
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,12 +21,14 @@ public class ApplyRoom extends JFrame {
     JLabel studentIdValue, nameValue, genderValue;
     JLabel selectedRoomLabel, selectedRoomValue;
     JLabel specialRequestLabel;
+    JLabel searchLabel;
 
     JTable roomTable;
     JScrollPane tableScrollPane, requestScrollPane;
     JTextArea specialRequestArea;
+    JTextField searchField;
 
-    JButton applyButton, clearButton, backButton;
+    JButton applyButton, clearButton, backButton, searchButton;
     JPanel panel;
 
     String studentId;
@@ -39,7 +41,7 @@ public class ApplyRoom extends JFrame {
         this.studentGender = studentGender;
 
         setTitle("Apply for Room");
-        setSize(760, 520);
+        setSize(800, 560);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -66,6 +68,15 @@ public class ApplyRoom extends JFrame {
         genderValue = new JLabel(this.studentGender);
         genderValue.setBounds(130, 130, 180, 25);
 
+        searchLabel = new JLabel("Search Room:");
+        searchLabel.setBounds(420, 100, 100, 25);
+
+        searchField = new JTextField();
+        searchField.setBounds(520, 100, 140, 25);
+
+        searchButton = new JButton("Search");
+        searchButton.setBounds(670, 100, 80, 25);
+
         String[] columnNames = {"Room ID", "Room Number", "Room Type", "Capacity", "Occupied", "Available"};
         DefaultTableModel model = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -83,7 +94,7 @@ public class ApplyRoom extends JFrame {
         roomTable.getColumnModel().getColumn(0).setWidth(0);
 
         tableScrollPane = new JScrollPane(roomTable);
-        tableScrollPane.setBounds(40, 180, 660, 150);
+        tableScrollPane.setBounds(40, 180, 710, 150);
 
         selectedRoomLabel = new JLabel("Selected Room:");
         selectedRoomLabel.setBounds(40, 350, 100, 25);
@@ -116,6 +127,18 @@ public class ApplyRoom extends JFrame {
             }
         });
 
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchRooms();
+            }
+        });
+
+        searchField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchRooms();
+            }
+        });
+
         applyButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 handleApplication();
@@ -124,6 +147,8 @@ public class ApplyRoom extends JFrame {
 
         clearButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                searchField.setText("");
+                loadRooms();
                 roomTable.clearSelection();
                 selectedRoomValue.setText("None");
                 specialRequestArea.setText("");
@@ -148,6 +173,9 @@ public class ApplyRoom extends JFrame {
         panel.add(nameValue);
         panel.add(genderLabel);
         panel.add(genderValue);
+        panel.add(searchLabel);
+        panel.add(searchField);
+        panel.add(searchButton);
         panel.add(tableScrollPane);
         panel.add(selectedRoomLabel);
         panel.add(selectedRoomValue);
@@ -162,7 +190,7 @@ public class ApplyRoom extends JFrame {
         loadRooms();
 
         setVisible(true);
-        
+
         SessionTimeout.start(this);
     }
 
@@ -190,6 +218,55 @@ public class ApplyRoom extends JFrame {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Failed to load rooms.");
+            e.printStackTrace();
+        }
+    }
+
+    private void searchRooms() {
+        String keyword = searchField.getText().trim();
+
+        if (keyword.isEmpty()) {
+            loadRooms();
+            return;
+        }
+
+        String sql = "SELECT roomID, roomNum, roomType, capacity, occupied, (capacity - occupied) AS available "
+                   + "FROM rooms "
+                   + "WHERE roomNum LIKE ? OR roomType LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                DefaultTableModel model = (DefaultTableModel) roomTable.getModel();
+                model.setRowCount(0);
+
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getInt("roomID"),
+                        rs.getString("roomNum"),
+                        rs.getString("roomType"),
+                        rs.getInt("capacity"),
+                        rs.getInt("occupied"),
+                        rs.getInt("available")
+                    };
+                    model.addRow(row);
+                }
+
+                roomTable.clearSelection();
+                selectedRoomValue.setText("None");
+
+                if (model.getRowCount() == 0) {
+                    JOptionPane.showMessageDialog(this, "No matching rooms found.");
+                }
+            }
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Failed to search rooms.");
             e.printStackTrace();
         }
     }
