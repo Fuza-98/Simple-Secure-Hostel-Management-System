@@ -8,11 +8,11 @@ import java.util.List;
 import db.RoomDAO;
 import RoomsDetails.Room;
 
-import util.SessionTimeout;
+import util.*;
+import java.util.logging.*;
 
 public class ManageRooms extends JFrame {
     
-    private String role;
     
     private JTable roomTable;
     private DefaultTableModel model;
@@ -21,15 +21,29 @@ public class ManageRooms extends JFrame {
     private JTextField capField, occupiedField, availableField;
     private JButton addButton, updateButton, deleteButton, backButton, refreshButton, clearButton, searchButton;
     private RoomDAO roomDAO;
+    
+    private static final Logger logger = Logger.getLogger(ManageRooms.class.getName());
 
-    public ManageRooms(String role) {
-        this.role = role;
-
-        if (!"admin".equalsIgnoreCase(role)) {
-            JOptionPane.showMessageDialog(null, "Access denied. Admins only.");
+    public ManageRooms() {
+        
+        try {
+            // Create a FileHandler to write logs to a log file
+            FileHandler fileHandler = new FileHandler("appLogs.log", true); // 'true' to append to the file
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Check if the user is an admin
+        if (!Session.isAdmin()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Admins only.");
+            new Login();
             dispose();
             return;
         }
+        
         roomDAO = new RoomDAO();
 
         setTitle("Room Management System");
@@ -240,6 +254,7 @@ public class ManageRooms extends JFrame {
                 );
 
                 if (roomDAO.addRoom(room)) {
+                    logger.info("Room added: " + room.getRoomNum() + " with ID: " + room.getRoomID());
                     JOptionPane.showMessageDialog(null, "Room added successfully!");
                     loadTableData();
                     clearFields();
@@ -261,6 +276,7 @@ public class ManageRooms extends JFrame {
                     );
 
                     if (roomDAO.updateRoom(room)) {
+                        logger.info("Room updated: " + room.getRoomNum() + " with ID: " + room.getRoomID());
                         JOptionPane.showMessageDialog(null, "Room updated successfully!");
                         loadTableData();
                         clearFields();
@@ -277,6 +293,7 @@ public class ManageRooms extends JFrame {
             if (selectedRow >= 0) {
                 String roomNum = model.getValueAt(selectedRow, 1).toString();
                 if (roomDAO.deleteRoom(roomNum)) {
+                    logger.info("Room deleted: " + roomNum);
                     JOptionPane.showMessageDialog(null, "Room deleted successfully!");
                     loadTableData();
                     clearFields();
@@ -294,7 +311,9 @@ public class ManageRooms extends JFrame {
         });
 
         // SEARCH
-        searchButton.addActionListener(e -> searchAndLoadRoom());
+        searchButton.addActionListener(e -> { 
+            logger.info("Search started for room number: " + roomNoField.getText().trim());
+        searchAndLoadRoom();});
 
         // CLEAR FIELDS
         clearButton.addActionListener(e -> {
@@ -322,7 +341,7 @@ public class ManageRooms extends JFrame {
         });
 
         backButton.addActionListener(e -> {
-            new AdminDashboard(ManageRooms.this.role);
+            new AdminDashboard();
             dispose();
         });
 
@@ -334,6 +353,18 @@ public class ManageRooms extends JFrame {
 
     private void searchAndLoadRoom() {
         String roomNum = roomNoField.getText().trim().toUpperCase();
+        
+         // Validate room number input
+        if (!roomNum.matches("^[A-Za-z0-9\\-]+$")) {
+            JOptionPane.showMessageDialog(this, "Room number can only contain letters, numbers, and hyphens.");
+            return;
+        }
+        
+        // Check if input exceeds 4 characters
+        if (roomNum.length() > 4) {
+            JOptionPane.showMessageDialog(this, "Room number or type must not exceed 4 characters.");
+            return;
+        }
 
         if (roomNum.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Please enter a room number to search.");

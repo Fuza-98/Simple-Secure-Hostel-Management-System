@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import db.DBConnection;
 
-import util.SessionTimeout;
+import util.*;
 
 public class studentInfo extends JFrame {
 
@@ -33,10 +33,17 @@ public class studentInfo extends JFrame {
     String studentId, studentName, studentGender, studentPhone, studentEmail, studentAddress;
     
 
-    public studentInfo(String studentId, String studentName, String studentGender) {
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.studentGender = studentGender;
+    public studentInfo() {
+        String studentId = Session.getStudentId();
+        String studentName = Session.getStudentName();
+        String studentGender = Session.getStudentGender();
+            // Check if the user is a student
+        if (!Session.isStudent()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Students only.");
+            new Login();
+            dispose();
+            return;
+        }
 
         setTitle("Personal Information");
         setSize(550, 420);
@@ -55,17 +62,17 @@ public class studentInfo extends JFrame {
 
         studentIdLabel = new JLabel("Student ID:");
         studentIdLabel.setBounds(70, 90, 120, 25);
-        studentIdValue = new JLabel(this.studentId);
+        studentIdValue = new JLabel(studentId);
         studentIdValue.setBounds(220, 90, 200, 25);
 
         nameLabel = new JLabel("Name:");
         nameLabel.setBounds(70, 125, 120, 25);
-        nameValue = new JLabel(this.studentName);
+        nameValue = new JLabel(studentName);
         nameValue.setBounds(220, 125, 200, 25);
 
         genderLabel = new JLabel("Gender:");
         genderLabel.setBounds(70, 160, 120, 25);
-        genderValue = new JLabel(this.studentGender);
+        genderValue = new JLabel(studentGender);
         genderValue.setBounds(220, 160, 200, 25);
         
 
@@ -89,7 +96,7 @@ public class studentInfo extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(studentInfo.this.studentId, studentInfo.this.studentName, studentInfo.this.studentGender);
+                new StudentDashboard();
                 dispose();
             }
         });
@@ -124,7 +131,7 @@ public class studentInfo extends JFrame {
             try (Connection conn = DBConnection.getConnection();
                  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-                ps.setString(1, studentId);
+                ps.setString(1, Session.getStudentId());
 
                 ResultSet rs = ps.executeQuery();
 

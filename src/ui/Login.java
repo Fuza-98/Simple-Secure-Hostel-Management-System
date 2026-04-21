@@ -6,6 +6,8 @@ package ui;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
+import util.*;
+import java.util.logging.*;
 
 //DB imports
 
@@ -19,8 +21,11 @@ import org.mindrot.jbcrypt.BCrypt;
 
 /**
  *
- * @author Acer
+ * @author Fauzan
  */
+
+
+
 public class Login extends JFrame{
     JLabel titleLabel, loginLabel, userLabel, passLabel, statusLabel;
     JTextField userField;
@@ -28,7 +33,21 @@ public class Login extends JFrame{
     JButton loginButton, clearButton, registerButton;
     JPanel panel;
     
+    private static final Logger logger = Logger.getLogger(Login.class.getName());
+    
     public Login(){
+        try {
+            // Create a FileHandler to write logs to a file
+            FileHandler fileHandler = new FileHandler("appLogs.log", true);  // 'true' to append to the file
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        
+        
         setTitle("HOSTEL MANAGEMENT SYSTEM");
         setSize(500,380);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -136,27 +155,40 @@ public class Login extends JFrame{
                     String role = rs.getString("role");
 
                     if ("student".equals(role)) {
+                        
                         String studentId = rs.getString("studentID");
                         String studentName = rs.getString("full_name");
                         String studentGender = rs.getString("gender");
+                        
+                        // Log successful login
+                        logger.info("User " + studentName + " (" + studentId + ") logged in successfully as " + role);
 
-                        new StudentDashboard(studentId, studentName, studentGender);
+                        Session.startSession(role, studentId, studentName, studentGender);
                         dispose();
+                        new StudentDashboard();
                     } else if ("admin".equals(role)) {
-                        new AdminDashboard(role);
+                        String adminId = rs.getString("studentID"); // adminId can be used as reference (if necessary)
+                        Session.startSession(role, adminId, null, null); // Admin has no student-specific details
+                        new AdminDashboard();
                         dispose();
                     }
                 } else {
+                    // Log failed login attempt
+                    logger.warning("Failed login attempt for username: " + username);
                     statusLabel.setText("Invalid username or password");
                     statusLabel.setForeground(Color.RED);
                 }
             } else {
+                // Log failed login attempt
+                logger.warning("Failed login attempt for username: " + username);
                 statusLabel.setText("Invalid username or password");
                 statusLabel.setForeground(Color.RED);
             }
         }
 
     } catch (Exception e) {
+        //DB error logging
+        logger.severe("Database error occurred during login: " + e.getMessage());
         statusLabel.setText("Database error occurred");
         statusLabel.setForeground(Color.RED);
         e.printStackTrace();

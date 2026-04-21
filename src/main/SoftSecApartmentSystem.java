@@ -4,7 +4,7 @@
  */
 package main;
 
-import ui.Login;
+import ui.*;
 import java.sql.Connection;
 import db.DBConnection;
 /**

@@ -3,21 +3,35 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import util.SessionTimeout;
+import util.*;
+import java.util.logging.*;
 
 public class AdminDashboard extends JFrame {
     
-    private String role;
+    private String adminId;
     
     JLabel titleLabel, welcomeLabel;
     JButton manageRoomsButton, viewApplicationsButton, logoutButton;
     JPanel panel;
 
-    public AdminDashboard(String role) {  
-        this.role = role;
-
-        if (!"admin".equalsIgnoreCase(role)) {
-            JOptionPane.showMessageDialog(null, "Access denied. Admins only.");
+    private static final Logger logger = Logger.getLogger(AdminDashboard.class.getName());
+    public AdminDashboard() {  
+        
+        String adminId = Session.getStudentId();
+        
+        try {
+            // Create a FileHandler to write logs to a file
+            FileHandler fileHandler = new FileHandler("appLogs.log", true);  // 'true' to append to the file
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // Check if the user is an admin
+        if (!Session.isAdmin()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Admins only.");
+            new Login();
             dispose();
             return;
         }
@@ -46,20 +60,24 @@ public class AdminDashboard extends JFrame {
 
         logoutButton = new JButton("Logout");
         logoutButton.setBounds(140, 240, 220, 40);
+        logoutButton.setBackground(Color.RED);
+        logoutButton.setForeground(Color.WHITE);
 
         // Action Listeners
         manageRoomsButton.addActionListener(e -> {
-            new ManageRooms(AdminDashboard.this.role);
+            new ManageRooms();
             dispose();
         });
         
         viewApplicationsButton.addActionListener(e -> {
-            new ViewApplications(AdminDashboard.this.role);
+            new ViewApplications();
             dispose();
         });
 
         logoutButton.addActionListener(e -> {
+            Session.clearSession();
             SessionTimeout.stop();
+            logger.info("Logged out for admin: " + adminId);
             new Login();
             dispose();
         });

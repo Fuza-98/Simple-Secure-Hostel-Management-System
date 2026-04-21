@@ -14,7 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import db.DBConnection;
 
-import util.SessionTimeout;
+import util.*;
 
 public class ViewApplicationStatus extends JFrame {
 
@@ -31,10 +31,20 @@ public class ViewApplicationStatus extends JFrame {
     String studentName;
     String studentGender;
 
-    public ViewApplicationStatus(String studentId, String studentName, String studentGender) {
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.studentGender = studentGender;
+    public ViewApplicationStatus() {
+        
+        String studentId = Session.getStudentId();
+        String studentName = Session.getStudentName();
+        String studentGender = Session.getStudentGender();
+
+        // Check if the user is a student
+        if (!Session.isStudent()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Students only.");
+            new Login();
+            dispose();
+            return;
+        }
+        
 
         setTitle("View Application Status");
         setSize(600, 500);
@@ -51,17 +61,17 @@ public class ViewApplicationStatus extends JFrame {
 
         studentIdLabel = new JLabel("Student ID:");
         studentIdLabel.setBounds(60, 80, 100, 25);
-        studentIdValue = new JLabel(this.studentId);
+        studentIdValue = new JLabel(studentId);
         studentIdValue.setBounds(180, 80, 250, 25);
 
         nameLabel = new JLabel("Name:");
         nameLabel.setBounds(60, 110, 100, 25);
-        nameValue = new JLabel(this.studentName);
+        nameValue = new JLabel(studentName);
         nameValue.setBounds(180, 110, 250, 25);
 
         genderLabel = new JLabel("Gender:");
         genderLabel.setBounds(60, 140, 100, 25);
-        genderValue = new JLabel(this.studentGender);
+        genderValue = new JLabel(studentGender);
         genderValue.setBounds(180, 140, 250, 25);
 
         applicationIdLabel = new JLabel("Application ID:");
@@ -99,11 +109,7 @@ public class ViewApplicationStatus extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(
-                        ViewApplicationStatus.this.studentId,
-                        ViewApplicationStatus.this.studentName,
-                        ViewApplicationStatus.this.studentGender
-                );
+                new StudentDashboard();
                 dispose();
             }
         });
@@ -149,7 +155,7 @@ public class ViewApplicationStatus extends JFrame {
         try (Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, studentId);
+            ps.setString(1, Session.getStudentId());
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

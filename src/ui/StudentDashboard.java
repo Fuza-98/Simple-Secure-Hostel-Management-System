@@ -3,8 +3,9 @@ package ui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.logging.*;
 
-import util.SessionTimeout;
+import util.*;
 
 public class StudentDashboard extends JFrame {
 
@@ -14,11 +15,32 @@ public class StudentDashboard extends JFrame {
 
     String studentId, studentName, studentGender;
     
+    private static final Logger logger = Logger.getLogger(StudentDashboard.class.getName());
+    
 
-    public StudentDashboard(String studentId, String studentName, String studentGender) {
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.studentGender = studentGender;
+    public StudentDashboard() {
+        
+        try {
+            // Create a FileHandler to write logs to a file
+            FileHandler fileHandler = new FileHandler("appLogs.log", true);  // 'true' to append to the file
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        String studentId = Session.getStudentId();
+        String studentName = Session.getStudentName();
+        String studentGender = Session.getStudentGender();
+        
+        // Check if the user is a student
+        if (!Session.isStudent()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Students only.");
+            new Login();
+            dispose();
+            return;
+        }
         
 
         setTitle("Student Dashboard");
@@ -34,7 +56,7 @@ public class StudentDashboard extends JFrame {
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setBounds(70, 30, 380, 30);
 
-        welcomeLabel = new JLabel("Welcome, " + this.studentName);
+        welcomeLabel = new JLabel("Welcome, " + studentName);
         welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         welcomeLabel.setBounds(150, 80, 250, 25);
 
@@ -56,27 +78,29 @@ public class StudentDashboard extends JFrame {
         //Buttons and event listeners
         applyRoomButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ApplyRoom(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new ApplyRoom();
                 dispose();
             }
         });
         
          personalInfoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new studentInfo(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new studentInfo();
                 dispose();
             }
         }); 
          
          viewRoomStatusButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new ViewApplicationStatus(StudentDashboard.this.studentId, StudentDashboard.this.studentName, StudentDashboard.this.studentGender);
+                new ViewApplicationStatus();
                 dispose();
             }
         }); 
 
         logoutButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                logger.info("User " + studentName + " (" + studentId + ") logged out");
+                Session.clearSession();
                 SessionTimeout.stop();
                 new Login();
                 dispose();

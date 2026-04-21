@@ -1,6 +1,7 @@
 package ui;
 
-import util.SessionTimeout;
+import util.*;
+import java.util.logging.*;
 
 // ui
 import javax.swing.*;
@@ -34,11 +35,32 @@ public class ApplyRoom extends JFrame {
     String studentId;
     String studentName;
     String studentGender;
+    
+    private static final Logger logger = Logger.getLogger(Login.class.getName());
 
-    public ApplyRoom(String studentId, String studentName, String studentGender) {
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.studentGender = studentGender;
+        public ApplyRoom() {
+            try {
+                // Create a FileHandler to write logs to a file
+                FileHandler fileHandler = new FileHandler("appLogs.log", true);  // 'true' to append to the file
+                SimpleFormatter formatter = new SimpleFormatter();
+                fileHandler.setFormatter(formatter);
+                logger.addHandler(fileHandler);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+        // Access session values directly (do not redeclare them)
+        String studentId = Session.getStudentId();
+        String studentName = Session.getStudentName();
+        String studentGender = Session.getStudentGender();
+
+        // Check if the user is a student
+        if (!Session.isStudent()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Students only.");
+            new Login();
+            dispose();
+            return;
+        }
 
         setTitle("Apply for Room");
         setSize(800, 560);
@@ -55,17 +77,17 @@ public class ApplyRoom extends JFrame {
 
         studentIdLabel = new JLabel("Student ID:");
         studentIdLabel.setBounds(40, 70, 100, 25);
-        studentIdValue = new JLabel(this.studentId);
+        studentIdValue = new JLabel(studentId); // Use session student ID
         studentIdValue.setBounds(130, 70, 180, 25);
 
         nameLabel = new JLabel("Name:");
         nameLabel.setBounds(40, 100, 100, 25);
-        nameValue = new JLabel(this.studentName);
+        nameValue = new JLabel(studentName); // Use session student name
         nameValue.setBounds(130, 100, 180, 25);
 
         genderLabel = new JLabel("Gender:");
         genderLabel.setBounds(40, 130, 100, 25);
-        genderValue = new JLabel(this.studentGender);
+        genderValue = new JLabel(studentGender); // Use session student gender
         genderValue.setBounds(130, 130, 180, 25);
 
         searchLabel = new JLabel("Search Room:");
@@ -157,11 +179,7 @@ public class ApplyRoom extends JFrame {
 
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new StudentDashboard(
-                        ApplyRoom.this.studentId,
-                        ApplyRoom.this.studentName,
-                        ApplyRoom.this.studentGender
-                );
+                new StudentDashboard();
                 dispose();
             }
         });
@@ -224,6 +242,19 @@ public class ApplyRoom extends JFrame {
 
     private void searchRooms() {
         String keyword = searchField.getText().trim();
+        
+        // Validate room number input
+        if (!keyword.matches("^[A-Za-z0-9\\-]+$")) {
+            JOptionPane.showMessageDialog(this, "Room number can only contain letters, numbers, and hyphens.");
+            return;
+        }
+        
+        // Check if input exceeds 4 characters
+        if (keyword.length() > 4) {
+            JOptionPane.showMessageDialog(this, "Room number or type must not exceed 4 characters.");
+            return;
+        }
+
 
         if (keyword.isEmpty()) {
             loadRooms();
@@ -300,11 +331,13 @@ public class ApplyRoom extends JFrame {
 
             // Check if student already has an active application
             try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-                checkPs.setString(1, studentId);
+                checkPs.setString(1, Session.getStudentId());
 
                 try (ResultSet rs = checkPs.executeQuery()) {
                     if (rs.next()) {
                         JOptionPane.showMessageDialog(this, "You already have an active application.");
+                        // Log the attempted duplicate application
+                        logger.warning("Student " +Session.getStudentId() + " tried to apply again while having an active application.");
                         return;
                     }
                 }
@@ -312,7 +345,7 @@ public class ApplyRoom extends JFrame {
 
             // Insert new application
             try (PreparedStatement insertPs = conn.prepareStatement(insertSql)) {
-                insertPs.setString(1, studentId);
+                insertPs.setString(1, Session.getStudentId());
                 insertPs.setInt(2, roomId);
                 insertPs.setString(3, specialRequest.isEmpty() ? null : specialRequest);
                 insertPs.setString(4, "Pending");
@@ -320,6 +353,8 @@ public class ApplyRoom extends JFrame {
                 int rowsInserted = insertPs.executeUpdate();
 
                 if (rowsInserted > 0) {
+                    // In event listeners, you can use:
+                    logger.info("Student " + studentId + " applied for a room " + roomTable.getValueAt(selectedRow, 1) + " on " + new java.util.Date());
                     JOptionPane.showMessageDialog(this, "Application submitted successfully.");
                     roomTable.clearSelection();
                     selectedRoomValue.setText("None");
@@ -331,6 +366,7 @@ public class ApplyRoom extends JFrame {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Database error occurred while submitting application.");
+            logger.severe("Database error during application submission for student " + Session.getStudentId() + ": " + e.getMessage());
             e.printStackTrace();
         }
     }

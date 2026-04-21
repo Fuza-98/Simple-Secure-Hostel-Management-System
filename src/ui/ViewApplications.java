@@ -8,11 +8,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
 
-import util.SessionTimeout;
+
+import util.*;
+import java.util.logging.*;
 
 public class ViewApplications extends JFrame {
     
-    private String role;
+    private static final Logger logger = Logger.getLogger(ViewApplications.class.getName());
 
     private JTable applicationTable;
     private DefaultTableModel model;
@@ -29,11 +31,22 @@ public class ViewApplications extends JFrame {
 
     private JButton approveButton, rejectButton, refreshButton, backButton, deleteButton;
 
-    public ViewApplications(String role) {
-        this.role = role;
-
-        if (!"admin".equalsIgnoreCase(role)) {
-            JOptionPane.showMessageDialog(null, "Access denied. Admins only.");
+    public ViewApplications() {
+        
+        try {
+            // Create a FileHandler to write logs to a log file
+            FileHandler fileHandler = new FileHandler("appLogs.log", true); // 'true' to append to the file
+            SimpleFormatter formatter = new SimpleFormatter();
+            fileHandler.setFormatter(formatter);
+            logger.addHandler(fileHandler);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        // Check if the user is an admin
+        if (!Session.isAdmin()) {
+            JOptionPane.showMessageDialog(null, "Access Denied. Admins only.");
+            new Login();
             dispose();
             return;
         }
@@ -169,15 +182,16 @@ public class ViewApplications extends JFrame {
             }
         });
 
-        approveButton.addActionListener(e -> approveApplication());
-        rejectButton.addActionListener(e -> rejectApplication());
-        deleteButton.addActionListener(e -> deleteRejectedApplication());
+        approveButton.addActionListener(e -> {approveApplication();});
+        rejectButton.addActionListener(e -> {rejectApplication();});
+        deleteButton.addActionListener(e -> {deleteRejectedApplication();});
         refreshButton.addActionListener(e -> {
+            logger.info("Refreshed applications table");
             loadApplications();
             clearFields();
         });
         backButton.addActionListener(e -> {
-            new AdminDashboard(ViewApplications.this.role);
+            new AdminDashboard();
             dispose();
         });
 
@@ -284,6 +298,7 @@ public class ViewApplications extends JFrame {
         String currentStatus = model.getValueAt(row, 6).toString();
 
         if (!"Pending".equalsIgnoreCase(currentStatus)) {
+            logger.warning("Failed to approve student for id: " + studentIdField.getText()); 
             JOptionPane.showMessageDialog(this, "Only pending applications can be approved.");
             return;
         }
@@ -336,8 +351,10 @@ public class ViewApplications extends JFrame {
             JOptionPane.showMessageDialog(this, "Application approved successfully.");
             loadApplications();
             clearFields();
+            logger.info("Approved student " + studentIdField.getText() + " for room " + roomNumField.getText()); 
 
         } catch (SQLException e) {
+            logger.warning("Failed to approve student for id: " + studentIdField.getText()); 
             JOptionPane.showMessageDialog(this, "Failed to approve application: " + e.getMessage());
         }
     }
@@ -353,6 +370,7 @@ public class ViewApplications extends JFrame {
         String currentStatus = model.getValueAt(row, 6).toString();
 
         if (!"Pending".equalsIgnoreCase(currentStatus)) {
+            logger.warning("Failed to reject student for id: " + studentIdField.getText()); 
             JOptionPane.showMessageDialog(this, "Only pending applications can be rejected.");
             return;
         }
@@ -368,9 +386,11 @@ public class ViewApplications extends JFrame {
                 JOptionPane.showMessageDialog(this, "Application rejected.");
                 loadApplications();
                 clearFields();
+                logger.info("Rejected student " + studentIdField.getText() + " for room " + roomNumField.getText());
             }
 
         } catch (SQLException e) {
+            logger.warning("Failed to reject student for id: " + studentIdField.getText()); 
             JOptionPane.showMessageDialog(this, "Failed to reject application: " + e.getMessage());
         }
     }

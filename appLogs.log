@@ -1,0 +1,22 @@
+Apr 21, 2026 12:28:47 PM ui.Login handleLogin
+WARNING: Failed login attempt for username: aaaaaaaa
+Apr 21, 2026 12:28:54 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
+Apr 21, 2026 12:35:05 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
+Apr 21, 2026 12:35:06 PM ui.StudentDashboard$4 actionPerformed
+INFO: User Fauzan Zaidi (BSW01085344) logged out
+Apr 21, 2026 12:42:15 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
+Apr 21, 2026 12:42:20 PM ui.ApplyRoom handleApplication
+WARNING: Student null tried to apply again while having an active application.
+Apr 21, 2026 12:42:55 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
+Apr 21, 2026 12:43:00 PM ui.ApplyRoom handleApplication
+WARNING: Student BSW01085344 tried to apply again while having an active application.
+Apr 21, 2026 12:43:06 PM ui.StudentDashboard$4 actionPerformed
+INFO: User Fauzan Zaidi (BSW01085344) logged out
+Apr 21, 2026 12:50:40 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
+Apr 21, 2026 2:22:22 PM ui.Login handleLogin
+INFO: User Fauzan Zaidi (BSW01085344) logged in successfully as student
