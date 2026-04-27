@@ -11,7 +11,7 @@ public class SessionTimeout {
     private static AWTEventListener activityListener;
 
     // 5 minutes = 300000 ms (1 second for testing purposes)
-    private static final int TIMEOUT_DURATION = 30000;
+    private static final int TIMEOUT_DURATION = 300000;
 
     public static void start(JFrame currentFrame) {
         // Ensure we only run this if the user is logged in (session is active)
